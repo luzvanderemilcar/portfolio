@@ -34,7 +34,6 @@ section.top-padded {
   padding-top: 70px;
 }
 
-/*.internal-target {}*/
 
 section {
   margin: 50px auto;
@@ -69,7 +68,7 @@ textarea {
 }
 
 button,
-[appearance="button"] {
+[role="button"] {
   padding: 15px 20px;
   border-radius: 10px;
   text-decoration: none;
@@ -242,7 +241,7 @@ button,
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding : 10px ;
+  padding : 10px 10px 20px ;
   background-color: var(--secondary-color, lavender);
 }
 
@@ -445,6 +444,7 @@ body > .footer {
   
   .projets {
     flex-direction: column;
+    align-items: center;
     gap: 25px;
   }
   
