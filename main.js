@@ -23,7 +23,6 @@ function gererEntreeVide(e) {
   }
 }
 
-
 // liensInternes
 const liensInternes = document.querySelectorAll(".internal-link");
 
@@ -37,7 +36,7 @@ function gererClickLienInterne(e) {
   let elementLien = e.target;
   
   let targetSelector = elementLien.getAttribute("href");
-  
+  // élément ciblé par le lien
   const targetElement = document.querySelector(targetSelector);
   
   const targetPosition = targetElement.getBoundingClientRect().top + window.scrollY - getHeaderOffset();
