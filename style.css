@@ -138,6 +138,11 @@ button,
   align-items: center;
 }
 
+.navbar .internal-link.active {
+  color: var(--primary-color, #9999E8);
+  font-weight: bold;
+}
+
 .nom-portfolio {
   font-weight: bold;
   text-transform: uppercase;
