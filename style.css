@@ -211,11 +211,8 @@ button,
 .a-propos-words {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   align-items: flex-start ;
-}
-
-.a-propos-words p {
-  margin-bottom: min(10%, 60px);
 }
 
 .owner-image {
