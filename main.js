@@ -42,4 +42,19 @@ function gererClickLienInterne(e) {
   const targetPosition = targetElement.getBoundingClientRect().top + window.scrollY - getHeaderOffset();
   // défiler la fenêtre vers la position ciblée
   window.scrollTo({ top: targetPosition, behavior: 'smooth' });
+  // set active
+  removeNavBarActive();
+  addNavBarActive(targetSelector.substring(1));
+  
+}
+
+function removeNavBarActive() {
+  let navBarLinks = document.querySelectorAll("a.internal-link");
+  navBarLinks.forEach(link => {
+    link.classList.contains('active') && link.classList.remove('active');
+  })
+}
+
+function addNavBarActive(id) {
+ document.querySelector(`[href="#${id}"]`).classList.add("active");
 }
