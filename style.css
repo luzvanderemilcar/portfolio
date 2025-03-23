@@ -224,8 +224,8 @@ button,
 .owner-image {
   border: 2.5px solid var(--primary-color, #9999E8);
   border-radius: 50%;
-  max-width: calc(100% - 40px);
-  margin: 15px;
+  width: calc(70% - 5px);
+  margin: 15px 15%;
 }
 
 /* Projets */
@@ -441,6 +441,7 @@ body>.footer {
   /* A propos */
   #a-propos .section-contenu {
     flex-direction: column-reverse;
+    align-items: center
   }
   
   .projets {
