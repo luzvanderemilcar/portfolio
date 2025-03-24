@@ -59,15 +59,19 @@ function removeNavBarActive() {
 }
 
 function addNavBarActive(id) {
-  let targetElement = document.querySelector(`[href="#${id}"]`);
+  let targetElement = document.querySelector(`.navbar-link[href="#${id}"]`);
   !targetElement.classList.contains('active') && targetElement.classList.add("active");
 }
 
 function setActive(id) {
+  if (id) {
   // remove current active
   removeNavBarActive();
   // add active to element with href id
   addNavBarActive(id);
+  } else {
+    console.log("Check the ids to target");
+  }
 }
 
 let headerElement = document.querySelector("#contact");
@@ -77,42 +81,41 @@ let tTimeout;
 let scrollDelaySeconds = .5;
 
 document.addEventListener("scroll", (e) => {
-  // debounce the scrollend actions for the active element setting
+  // debounce the scroll actions for the active element setting
   if (tTimeout) clearTimeout(tTimeout);
   tTimeout = setTimeout(() => {
     // find the active section at scrollend
-    let activeSection = getActiveElement(documentSections,  getHeaderOffset());
-    let activeSectionId = activeSection.getAttribute('id');
-  
-  setActive(activeSectionId)
+    let activeSectionId = getActiveElementId(documentSections, getHeaderOffset());
+    
+    setActive(activeSectionId)
   }, scrollDelaySeconds * 1000);
 });
 
-// find the active element prioritizing the element whose top is inside the viewport
-function getActiveElement(elements, topOffsetHeight) {
-  let activeElement;
+// find the active element id prioritizing the element whose top is inside the viewport
+function getActiveElementId(elements, topOffsetHeight) {
+  let activeElementId;
   let index = 0;
   
   // tester l'element dont le top se trouve dans le viewport
-  while (!activeElement && index < elements.length) {
+  while (!activeElementId && index < elements.length) {
     if (isTopInView(elements[index], topOffsetHeight)) {
-      activeElement = elements[index];
+      activeElementId = elements[index].getAttribute('id');
     }
     index++;
   }
   // tester si aucun des elements ne se commence dans le viewport
-  if (!activeElement) {
+  if (!activeElementId) {
     index = 0;
     // tester l'element dont le corps se trouve dans le viewport
-    while (!activeElement && index < elements.length) {
+    while (!activeElementId && index < elements.length) {
       if (isBodyInView(elements[index], topOffsetHeight)) {
-        activeElement = elements[index];
+        activeElementId = elements[index].getAttribute('id');
       }
       index++;
     }
   }
   // return l'attribut id de l'element active
-  return activeElement;
+  return activeElementId;
 }
 
 
@@ -123,7 +126,7 @@ function isTopInView(element, topOffsetHeight = 0) {
   let ratioMinInViewToBeActive = .6;
   
   // the y (top start position) of the element is positive and greater than a specific top offset but fewer than the height of the viewport 
-  if (distanceFromTop >= topOffsetHeight && distanceFromTop < window.innerHeight * (1 - ratioMinInViewToBeActive) ) {
+  if (distanceFromTop >= topOffsetHeight && distanceFromTop < window.innerHeight * (1 - ratioMinInViewToBeActive)) {
     if (distanceFromLeft < window.innerWidth || (distanceFromLeft + width) > 0) {
       return true;
     }
