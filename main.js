@@ -4,7 +4,7 @@ function getHeaderOffset() {
   return headerElement.offsetHeight;
 }
 // Required input | champs de rentrée obligatoire 
-const champsObligatoires = document.querySelectorAll("input[type='text'][required],textarea[required]");
+const champsObligatoires = document.querySelectorAll(".required-input,textar");
 
 // attach
 champsObligatoires.forEach(elementEntree => {
@@ -17,7 +17,7 @@ function gererEntreeVide(e) {
   // tester si la valeur de l'entrée est vide
   if (elementEntree.value.trim() === "") {
     // demander à l'utilisateur de confirmer sa sortie
-    if (!confirm("Remplir ce champ est obligatoire !\nVoulez sortir du champ ?")) {
+    if (!confirm("Remplir ce champ est obligatoire !\nVoulez vous quitter le champ ?")) {
       elementEntree.focus();
     }
   }
@@ -76,7 +76,7 @@ let headerElement = document.querySelector("#contact");
 let tTimeout;
 let scrollDelaySeconds = .5;
 
-document.addEventListener("scrollend", (e) => {
+document.addEventListener("scroll", (e) => {
   // debounce the scrollend actions for the active element setting
   if (tTimeout) clearTimeout(tTimeout);
   tTimeout = setTimeout(() => {
