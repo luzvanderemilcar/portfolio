@@ -4,7 +4,7 @@ function getHeaderOffset() {
   return headerElement.offsetHeight;
 }
 // Required input | champs de rentrée obligatoire 
-const champsObligatoires = document.querySelectorAll(".required-input,textar");
+const champsObligatoires = document.querySelectorAll(".required-input");
 
 // attach
 champsObligatoires.forEach(elementEntree => {
@@ -53,11 +53,12 @@ function gererClickLienInterne(e) {
 function removeNavBarActive() {
   let navBarLinks = document.querySelectorAll(".navbar-link");
   navBarLinks.forEach(link => {
-    // remove active class from the active element
+    // retirer la classe active d'un élément ayant cette classe
     link.classList.contains('active') && link.classList.remove('active');
   })
 }
 
+//ajouter la classe active à un element qui référence l'id spécifié 
 function addNavBarActive(id) {
   let targetElement = document.querySelector(`.navbar-link[href="#${id}"]`);
   !targetElement.classList.contains('active') && targetElement.classList.add("active");
@@ -65,33 +66,30 @@ function addNavBarActive(id) {
 
 function setActive(id) {
   if (id) {
-  // remove current active
+  // retirer la classe active de l'élément (le cas échéant)
   removeNavBarActive();
-  // add active to element with href id
+  // ajouter la classe active à l'élément référençant id
   addNavBarActive(id);
   } else {
     console.log("Check the ids to target");
   }
 }
-
-let headerElement = document.querySelector("#contact");
-
 // Sections 
 let tTimeout;
 let scrollDelaySeconds = .5;
 
 document.addEventListener("scroll", (e) => {
-  // debounce the scroll actions for the active element setting
+  // différer(debounce) l'action de fixation de l'élément actif
   if (tTimeout) clearTimeout(tTimeout);
   tTimeout = setTimeout(() => {
-    // find the active section at scrollend
+    // trouver la section active à la fin d'un scroll 
     let activeSectionId = getActiveElementId(documentSections, getHeaderOffset());
     
     setActive(activeSectionId)
   }, scrollDelaySeconds * 1000);
 });
 
-// find the active element id prioritizing the element whose top is inside the viewport
+// trouver l'id de l'élément actif, priorité donnée à celui qui se commence dans le viewport
 function getActiveElementId(elements, topOffsetHeight) {
   let activeElementId;
   let index = 0;
@@ -119,36 +117,37 @@ function getActiveElementId(elements, topOffsetHeight) {
 }
 
 
-// find if an element's top is currently inside the viewport 
+// trouver si le debut de l'element est actuellement dans le viewport
 function isTopInView(element, topOffsetHeight = 0) {
   let { height, width, y: distanceFromTop, x: distanceFromLeft } = getElementPositions(element);
-  // ratio of the height of the visible part of an element in the viewport for it to be considered as active
+
+  //ratio de la partie du viewport occupé par un élément pour être considéré comme actif
   let ratioMinInViewToBeActive = .6;
   
-  // the y (top start position) of the element is positive and greater than a specific top offset but fewer than the height of the viewport 
+  // le y ( la position debut ou top ) est positive et plus grand que l'offset top de la page, mais plus petit que la hauteur de la hauteur de la page par le complément du ratio
   if (distanceFromTop >= topOffsetHeight && distanceFromTop < window.innerHeight * (1 - ratioMinInViewToBeActive)) {
     if (distanceFromLeft < window.innerWidth || (distanceFromLeft + width) > 0) {
       return true;
     }
   }
-  // default return 
+  // return par défaut 
   return false;
 }
 
-// find if an element's body is currently inside the viewport 
+// trouver si le corps d'un element est dans le viewport alors que son debut est scrolle
 function isBodyInView(element, topOffsetHeight = 0) {
   let { height, width, y: distanceFromTop, x: distanceFromLeft } = getElementPositions(element);
   
-  // the y of the element is negative or fewer than a specific top offset 
+  // le y ( la position debut ou top ) est négative et la somme de son y et de sa hauteur est plus grand que l'offset top de la page
   if (distanceFromTop < topOffsetHeight && (distanceFromTop + height) > topOffsetHeight) {
     if (distanceFromLeft < window.innerWidth || (distanceFromLeft + width) > 0) {
       return true;
     }
   }
-  // default return 
+  // return par défaut 
   return false;
 }
-// find the positions of an element
+// trouver les positionnements d'un élément 
 function getElementPositions(element) {
   let elementClientRects = element.getClientRects()[0];
   return elementClientRects;

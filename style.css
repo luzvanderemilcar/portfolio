@@ -90,7 +90,7 @@ button,
   height: calc(auto - 4px);
 }
 
-.text-centered {
+.center-text {
   text-align: center;
 }
 
@@ -104,6 +104,7 @@ button,
 
 .primary-text {
   color: var(--primary-color, #9999E8);
+  text-decoration: none;
 }
 
 .secondary-text {
@@ -139,6 +140,10 @@ button,
   align-items: center;
 }
 
+.internal-link {
+  text-decoration: none;
+}
+
 .navbar .internal-link.active {
   color: var(--primary-color, #9999E8);
   font-weight: bold;
@@ -149,10 +154,6 @@ button,
   text-transform: uppercase;
   margin: 0;
   padding: 0;
-}
-
-.prenom {
-  color: var(--primary-color, #9999E8);
 }
 
 .nav-list-item {
