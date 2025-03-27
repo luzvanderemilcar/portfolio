@@ -1,0 +1,32 @@
+name: Auto Merge main into gh-pages
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout main
+      uses: actions/checkout@v2
+      with:
+        ref: main
+    
+    - name: Set up Git
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
+    
+    - name: Checkout gh-pages branch
+      run: git checkout gh-pages
+    
+    - name: Merge main into gh-pages
+      run: git merge main
+    
+    - name: Push changes
+      run: git push origin gh-pages
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
