@@ -19,6 +19,9 @@ jobs:
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
+        
+    - name: List all branches
+      run: git branch -a
     
     - name: Checkout gh-pages branch
       run: git checkout gh-pages
