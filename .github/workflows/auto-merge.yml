@@ -25,6 +25,16 @@ jobs:
         git fetch --all
         git branch -a
     
+    - name: Create gh-pages branch if it does not exist
+      run: |
+        if git show-ref --quiet refs/heads/gh-pages; then
+          echo "Branch gh-pages exists."
+        else
+          echo "Branch gh-pages does not exist. Creating branch."
+          git checkout -b gh-pages
+          git push origin gh-pages
+        fi
+    
     - name: Checkout gh-pages branch
       run: git checkout gh-pages
     
