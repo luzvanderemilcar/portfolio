@@ -344,6 +344,10 @@ button,
   width: 75%;
 }
 
+.php {
+  width: 25%;
+}
+
 /* Contact */
 #contact {
   background-color: var(--dark-color, #555555);
