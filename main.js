@@ -1,3 +1,4 @@
+let goTopButtonElement;
 // trouver la hauteur de l'element header (la barre de navigation  comprise)
 function getHeaderOffset() {
   let headerElement = document.querySelector("header");
@@ -23,16 +24,41 @@ function gererEntreeVide(e) {
   }
 }
 
-// liens internes et target internes
-const liensInternes = document.querySelectorAll(".internal-link");
-const documentSections = document.querySelectorAll(".internal-target");
+  // liens internes et target internes
+  const liensInternes = document.querySelectorAll('.internal-link,[href^="#"]:not([href$="#"])');
+  const documentSections = document.querySelectorAll(".internal-target");
+  
+  
+  // ajouter un listener pour les clicks sur les liens internes
+  liensInternes.forEach(elementLien => {
+    elementLien.addEventListener("click", gererClickLienInterne);
+  });
+  
+  // Sections 
+  let tTimeout;
+  let scrollDebounceDelaySeconds = .5;
+  let hasScrolledDown = false;
+  let lastKnownYPosition = window.scrollY;
+  
+  document.addEventListener("scroll", (e) => {
+    // regarder s'il y a scroll vers le bas
+    hasScrolledDown = lastKnownYPosition < window.scrollY;
+    lastKnownYPosition = window.scrollY;
+    
+    // si l'ecran est glisse vers le bas ou la valueur du glissement est plus petite que la hauteur de l'ecran
+    if (hasScrolledDown || window.scrollY < window.innerHeight) {
+      hideElement(goTopButtonElement)
+    } else {
+      showElement(goTopButtonElement);
+    }
+    // différer(debounce) l'action de fixation de l'élément actif
+    if (tTimeout) clearTimeout(tTimeout);
+    tTimeout = setTimeout(() => {
+      scrollDebounceActions();
+    }, scrollDebounceDelaySeconds * 1000);
+  });
 
-
-// ajouter un listener pour les clicks sur les liens internes
-liensInternes.forEach(elementLien => {
-  elementLien.addEventListener("click", gererClickLienInterne)
-});
-
+// gererClickLienInterne
 function gererClickLienInterne(e) {
   e.preventDefault();
   let elementLien = e.target;
@@ -49,45 +75,11 @@ function gererClickLienInterne(e) {
   
 }
 
-
-function removeNavBarActive() {
-  let navBarLinks = document.querySelectorAll(".navbar-link");
-  navBarLinks.forEach(link => {
-    // retirer la classe active d'un élément ayant cette classe
-    link.classList.contains('active') && link.classList.remove('active');
-  })
+function scrollDebounceActions() {
+  // trouver la section active à la fin d'un scroll 
+  let activeSectionId = getActiveElementId(documentSections, getHeaderOffset());
+  setActive(activeSectionId);
 }
-
-//ajouter la classe active à un element qui référence l'id spécifié 
-function addNavBarActive(id) {
-  let targetElement = document.querySelector(`.navbar-link[href="#${id}"]`);
-  !targetElement.classList.contains('active') && targetElement.classList.add("active");
-}
-
-function setActive(id) {
-  if (id) {
-  // retirer la classe active de l'élément (le cas échéant)
-  removeNavBarActive();
-  // ajouter la classe active à l'élément référençant id
-  addNavBarActive(id);
-  } else {
-    console.log("Check the ids to target");
-  }
-}
-// Sections 
-let tTimeout;
-let scrollDelaySeconds = .5;
-
-document.addEventListener("scroll", (e) => {
-  // différer(debounce) l'action de fixation de l'élément actif
-  if (tTimeout) clearTimeout(tTimeout);
-  tTimeout = setTimeout(() => {
-    // trouver la section active à la fin d'un scroll 
-    let activeSectionId = getActiveElementId(documentSections, getHeaderOffset());
-    
-    setActive(activeSectionId)
-  }, scrollDelaySeconds * 1000);
-});
 
 // trouver l'id de l'élément actif, priorité donnée à celui qui se commence dans le viewport
 function getActiveElementId(elements, topOffsetHeight) {
@@ -116,11 +108,36 @@ function getActiveElementId(elements, topOffsetHeight) {
   return activeElementId;
 }
 
+//set the active element 
+function setActive(id) {
+  if (id) {
+    // retirer la classe active de l'élément (le cas échéant)
+    removeNavBarActive();
+    // ajouter la classe active à l'élément référençant id
+    addNavBarActive(id);
+  } else {
+    console.log("Check the ids to target");
+  }
+}
+
+function removeNavBarActive() {
+  let navBarLinks = document.querySelectorAll(".navbar-link");
+  navBarLinks.forEach(link => {
+    // retirer la classe active d'un élément ayant cette classe
+    link.classList.contains('active') && link.classList.remove('active');
+  })
+}
+
+//ajouter la classe active à un element qui référence l'id spécifié 
+function addNavBarActive(id) {
+  let targetElement = document.querySelector(`.navbar-link[href="#${id}"]`);
+  !targetElement.classList.contains('active') && targetElement.classList.add("active");
+}
 
 // trouver si le debut de l'element est actuellement dans le viewport
 function isTopInView(element, topOffsetHeight = 0) {
   let { height, width, y: distanceFromTop, x: distanceFromLeft } = getElementPositions(element);
-
+  
   //ratio de la partie du viewport occupé par un élément pour être considéré comme actif
   let ratioMinInViewToBeActive = .6;
   
@@ -151,4 +168,30 @@ function isBodyInView(element, topOffsetHeight = 0) {
 function getElementPositions(element) {
   let elementClientRects = element.getClientRects()[0];
   return elementClientRects;
+}
+
+function showElement(element) {
+  if (element.classList.contains("hidden")) element.classList.remove("hidden")
+}
+
+function hideElement(element) {
+  if (!element.classList.contains("hidden")) element.classList.add("hidden")
+}
+
+
+
+
+addGoTopButton();
+
+function addGoTopButton() {
+  let targetElementId = "accueil";
+  
+  let goTopButton = document.createElement('button');
+  goTopButton.innerHTML = 'Go Top';
+  goTopButton.classList.add("go-top", 'primary-outline', 'hidden');
+  //set the target element id
+  goTopButton.setAttribute("href", "#" + targetElementId);
+  goTopButton.onclick = gererClickLienInterne;
+  goTopButtonElement = goTopButton;
+  document.body.appendChild(goTopButton);
 }
