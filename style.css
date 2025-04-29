@@ -3,7 +3,8 @@
   
   /* Color */
   --primary-color: #9999E8;
-  --primary-dark-color: #7B7BD4;
+  --primary-hover-color: #7B7BD4;
+  --primary-clicked-color: #6C6BD1;
   --secondary-color: lavender;
   --details-color: blueviolet;
   --white-color: #fff;
@@ -85,7 +86,13 @@ button,
 }
 
 .primary:hover {
-  background-color: var(--primary-dark-color, #7B7BD4);
+  background-color: var(--primary-hover-color, #7B7BD4);
+}
+
+.primary.clicked, .primary-outline.clicked {
+  background-color: var(--primary-clicked-color, #6C6BD1
+  );
+  color: var(--white-color, #ffffff);
 }
 
 .primary-outline {

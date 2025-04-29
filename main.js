@@ -75,6 +75,39 @@ function gererClickLienInterne(e) {
   
 }
 
+// Sélectionner les actions avec le class primary ou primary-outline 
+let primaryActions = document.querySelectorAll(".primary,.primary-outline");
+
+  // ajouter un listener pour les clicks sur ces actions
+  primaryActions.forEach(primaryAction => {
+    primaryAction.addEventListener("click", gereClickPrimaryAction);
+  });
+  
+  
+  // ajouter un listener pour un click en dehors d'un lien ou button initialement clické
+  primaryActions.forEach(primaryAction => {
+    primaryAction.addEventListener("blur", gererBlurPrimaryAction);
+  });
+  
+
+function gereClickPrimaryAction(e) {
+  let primaryAction = e.target;
+  
+  if (primaryAction.classList.contains("primary") || primaryAction.classList.contains("primary-outline")) {
+    if (!primaryAction.classList.contains("clicked")) primaryAction.classList.add("clicked")
+  }
+}
+
+
+function gererBlurPrimaryAction(e) {
+  
+  let primaryAction = e.target;
+  
+  if (primaryAction.classList.contains("primary") || primaryAction.classList.contains("primary-outline")) {
+    if (primaryAction.classList.contains("clicked")) primaryAction.classList.remove("clicked")
+  }
+}
+
 function scrollDebounceActions() {
   // trouver la section active à la fin d'un scroll 
   let activeSectionId = getActiveElementId(documentSections, getHeaderOffset());
@@ -179,8 +212,6 @@ function hideElement(element) {
 }
 
 
-
-
 addGoTopButton();
 
 function addGoTopButton() {
@@ -192,6 +223,7 @@ function addGoTopButton() {
   //set the target element id
   goTopButton.setAttribute("href", "#" + targetElementId);
   goTopButton.onclick = gererClickLienInterne;
+  goTopButton.onblur = gererBlurPrimaryAction;
   goTopButtonElement = goTopButton;
   document.body.appendChild(goTopButton);
 }
