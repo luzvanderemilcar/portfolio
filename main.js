@@ -24,39 +24,48 @@ function gererEntreeVide(e) {
   }
 }
 
-  // liens internes et target internes
-  const liensInternes = document.querySelectorAll('.internal-link,[href^="#"]:not([href$="#"])');
-  const documentSections = document.querySelectorAll(".internal-target");
+// liens internes et target internes
+const liensInternes = document.querySelectorAll('.internal-link,[href^="#"]:not([href$="#"])');
+const documentSections = document.querySelectorAll(".internal-target");
+
+
+// ajouter un listener pour les clicks sur les liens internes
+liensInternes.forEach(elementLien => {
+  elementLien.addEventListener("click", gererClickLienInterne);
+});
+
+// Sections 
+let tTimeout;
+let scrollDebounceDelaySeconds = .5;
+let hasScrolledDown = false;
+let isScrolling = false;
+let lastKnownYPosition = window.scrollY;
+
+document.addEventListener("scroll", (e) => {
+  // regarder s'il y a scroll vers le bas
+  hasScrolledDown = lastKnownYPosition < window.scrollY;
+  lastKnownYPosition = window.scrollY;
   
+  // si l'ecran est glisse vers le bas ou la valueur du glissement est plus petite que la hauteur de l'ecran
+  if (hasScrolledDown || window.scrollY < window.innerHeight) {
+    hideElement(goTopButtonElement)
+  } else {
+    showElement(goTopButtonElement);
+  }
+  // différer(debounce) l'action de fixation de l'élément actif
+  if (tTimeout) clearTimeout(tTimeout);
+  tTimeout = setTimeout(() => {
+    scrollDebounceActions();
+  }, scrollDebounceDelaySeconds * 1000);
   
-  // ajouter un listener pour les clicks sur les liens internes
-  liensInternes.forEach(elementLien => {
-    elementLien.addEventListener("click", gererClickLienInterne);
-  });
-  
-  // Sections 
-  let tTimeout;
-  let scrollDebounceDelaySeconds = .5;
-  let hasScrolledDown = false;
-  let lastKnownYPosition = window.scrollY;
-  
-  document.addEventListener("scroll", (e) => {
-    // regarder s'il y a scroll vers le bas
-    hasScrolledDown = lastKnownYPosition < window.scrollY;
-    lastKnownYPosition = window.scrollY;
-    
-    // si l'ecran est glisse vers le bas ou la valueur du glissement est plus petite que la hauteur de l'ecran
-    if (hasScrolledDown || window.scrollY < window.innerHeight) {
-      hideElement(goTopButtonElement)
-    } else {
-      showElement(goTopButtonElement);
-    }
-    // différer(debounce) l'action de fixation de l'élément actif
-    if (tTimeout) clearTimeout(tTimeout);
-    tTimeout = setTimeout(() => {
-      scrollDebounceActions();
-    }, scrollDebounceDelaySeconds * 1000);
-  });
+  //
+  isScrolling = true;
+});
+
+
+document.addEventListener("scrollend", () => {
+  isScrolling = false;
+});
 
 // gererClickLienInterne
 function gererClickLienInterne(e) {
@@ -78,17 +87,17 @@ function gererClickLienInterne(e) {
 // Sélectionner les actions avec le class primary ou primary-outline 
 let primaryActions = document.querySelectorAll(".primary,.primary-outline");
 
-  // ajouter un listener pour les clicks sur ces actions
-  primaryActions.forEach(primaryAction => {
-    primaryAction.addEventListener("click", gereClickPrimaryAction);
-  });
-  
-  
-  // ajouter un listener pour un click en dehors d'un lien ou button initialement clické
-  primaryActions.forEach(primaryAction => {
-    primaryAction.addEventListener("blur", gererBlurPrimaryAction);
-  });
-  
+// ajouter un listener pour les clicks sur ces actions
+primaryActions.forEach(primaryAction => {
+  primaryAction.addEventListener("click", gereClickPrimaryAction);
+});
+
+
+// ajouter un listener pour un click en dehors d'un lien ou button initialement clické
+primaryActions.forEach(primaryAction => {
+  primaryAction.addEventListener("blur", gererBlurPrimaryAction);
+});
+
 
 function gereClickPrimaryAction(e) {
   let primaryAction = e.target;
@@ -211,7 +220,51 @@ function hideElement(element) {
   if (!element.classList.contains("hidden")) element.classList.add("hidden")
 }
 
+// Bar de compétences 
+const barCompetences = document.querySelectorAll(".skill");
+let pressTimer = null;
+const longPressThreshold = 500; // milliseconds
 
+barCompetences.forEach(element => {
+  // Mouse events
+  element.addEventListener('mousedown', startPressTimer);
+  element.addEventListener('mouseup', cancelPressTimer);
+  element.addEventListener('mouseleave', cancelPressTimer);
+  
+  // Touch events
+  element.addEventListener('touchstart', startPressTimer);
+  element.addEventListener('touchend', cancelPressTimer);
+  element.addEventListener('touchcancel', cancelPressTimer);
+  
+});
+
+function startPressTimer(e) {
+  
+  // Long press detected
+  pressTimer = setTimeout(() => {
+      
+  // check if the document is not under scroll 
+  if (!isScrolling) {
+    let skillElement = e.target.findClosestParent(".skill");
+    let skillTextElement = skillElement.querySelector("p.nom");
+    
+    let leverElement = skillElement.querySelector(".leveler");
+    let fillerElement = skillElement.querySelector(".filler");
+    
+      alert(`${skillTextElement.innerHTML} : ${Math.round(100 * fillerElement.offsetWidth / leverElement.offsetWidth)}%`);
+  }
+    }, longPressThreshold);
+}
+
+function cancelPressTimer(e) {
+  // check if there is a timer set
+  if (pressTimer) {
+    clearTimeout(pressTimer);
+    pressTimer = null;
+  }
+}
+
+// To top button
 addGoTopButton();
 
 function addGoTopButton() {
@@ -227,3 +280,35 @@ function addGoTopButton() {
   goTopButtonElement = goTopButton;
   document.body.appendChild(goTopButton);
 }
+
+// define a method on HTMLElement class
+// it's intended to find the closest parent of an element that matches a specific selector given as an argument 
+// returns the element if it matches the selector, its closest parent that matches the selector or undefined if no match
+HTMLElement.prototype.findClosestParent =
+  function(selector) {
+    
+    // if the element or one of its parents match the selector
+    if (this.closest(selector)) {
+      // find if there is a match for the element itself
+      if (this.matches(selector)) {
+        return this;
+      } else {
+        let mainElement = this;
+        let parentElement;
+        do {
+          // find the element parent
+          parentElement = mainElement.parentElement;
+          
+          // check if the parent matches the selector 
+          if (parentElement.matches(selector)) {
+            return parentElement;
+          }
+          else {
+            // reassigning the parentElement as the next element to process (skip recursive statements)
+            mainElement = parentElement;
+          }
+        }
+        while (!parentElement.matches(selector))
+      }
+    }
+  }
