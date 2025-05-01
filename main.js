@@ -287,7 +287,7 @@ function addGoTopButton() {
 HTMLElement.prototype.findClosestParent =
   function(selector) {
     
-    // if the element or one of its parents match the selector
+    // if the element or one of its parents matches the selector
     if (this.closest(selector)) {
       // find if there is a match for the element itself
       if (this.matches(selector)) {

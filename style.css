@@ -226,18 +226,23 @@ button,
   gap: 50px;
 }
 
-.a-propos-words {
+.a-propos {
   display: flex;
   flex-direction: column;
+  gap: 25px ;
   justify-content: space-between;
   align-items: flex-start;
+}
+
+.a-propos-words {
+  margin-bottom: 50px;
 }
 
 .owner-image {
   border: 2.5px solid var(--primary-color, #9999E8);
   border-radius: 50%;
-  width: calc(70% - 5px);
-  margin: 15px 15%;
+  width: calc(60% - 5px);
+  margin: 15px 20%;
 }
 
 /* Projets */
