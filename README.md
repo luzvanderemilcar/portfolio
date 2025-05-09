@@ -11,7 +11,7 @@ I started developing this portfolio as part of my final project as I was learnin
 
 It's based on a wireframe that was given to the students. So, we were asked to write all the code in order to transform the visual design into functional website.
 
-I've added other functionalities over time, like active section highlight on navigation bar, 
+I've added other functionalities over time, like active section highlight on navigation bar, go to top button that shows up when scrolling up, skill info box (percentage) on long press,
 
 
 ## ✏ Modification notices 

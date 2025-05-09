@@ -212,6 +212,7 @@ function getElementPositions(element) {
   return elementClientRects;
 }
 
+// show or hide the an element by toggling the class hidden based on display css property
 function showElement(element) {
   if (element.classList.contains("hidden")) element.classList.remove("hidden")
 }
@@ -220,10 +221,48 @@ function hideElement(element) {
   if (!element.classList.contains("hidden")) element.classList.add("hidden")
 }
 
-// Bar de compétences 
+// Bar de compétences (selections)
 const barCompetences = document.querySelectorAll(".skill");
-let pressTimer = null;
+
+const infoBox = document.querySelector("#info-box");
+
+function configurerInfoBox({ top, left, text }) {
+  // customize the info box position and details
+  infoBox.style.top = top;
+  infoBox.style.left = left;
+  infoBox.innerText = text;
+  
+  // show the info box
+  showInfoBox();
+}
+
+// show or hide the info box element by toggling the class visible based on opacity level
+function showInfoBox() {
+  if (!infoBox.classList.contains("visible")) infoBox.classList.add("visible")
+}
+
+function hideInfoBox() {
+  if (infoBox.classList.contains("visible")) infoBox.classList.remove("visible")
+}
+
+// add the class highlight to an element passed as argument
+function highlightElement(element) {
+  if (!element.classList.contains("highlight")) element.classList.add("highlight")
+}
+
+// remove the class highlight from an element passed as argument
+function removeElementHighlight(element) {
+  if (element.classList.contains("highlight")) element.classList.remove("highlight")
+}
+
+// Long press event configurations
 const longPressThreshold = 500; // milliseconds
+let pressTimer = null;
+let clearHighlightTimer = null;
+let infoBoxTopOffset = -70;
+let infoBoxLeftOffset = 10;
+
+let lastSkillElement;
 
 barCompetences.forEach(element => {
   // Mouse events
@@ -240,27 +279,65 @@ barCompetences.forEach(element => {
 
 function startPressTimer(e) {
   
-  // Long press detected
-  pressTimer = setTimeout(() => {
-      
-  // check if the document is not under scroll 
-  if (!isScrolling) {
-    let skillElement = e.target.findClosestParent(".skill");
-    let skillTextElement = skillElement.querySelector("p.nom");
+  // check if a previous skill element has highlight 
+  if (clearHighlightTimer && lastSkillElement) {
+    // clear the remove highlight timer;
+    clearTimeout(clearHighlightTimer);
+    clearHighlightTimer = null;
     
-    let leverElement = skillElement.querySelector(".leveler");
-    let fillerElement = skillElement.querySelector(".filler");
-    
-      alert(`${skillTextElement.innerHTML} : ${Math.round(100 * fillerElement.offsetWidth / leverElement.offsetWidth)}%`);
+    // remove highlight immediately 
+    hideInfoBox();
+    removeElementHighlight(lastSkillElement);
   }
-    }, longPressThreshold);
+  // Long press detection using the duration of the touch and a timeout.
+  pressTimer = setTimeout(() => {
+    
+    // check if the document is not under scroll 
+    if (!isScrolling) {
+      
+      // find the skill element under pressure 
+      let skillElement = e.target.findClosestParent(".skill");
+      lastSkillElement = skillElement;
+      
+      let skillTextElement = skillElement.querySelector("p.nom");
+      
+      let leverElement = skillElement.querySelector(".leveler");
+      // the element that fills the skill bar according to is width
+      let fillerElement = skillElement.querySelector(".filler");
+      
+      // Evaluate the percentage of the skill filler element width 
+      let skillPercent = Math.round(100 * fillerElement.offsetWidth / leverElement.offsetWidth);
+      
+      // find the dimensions of the filler element
+      let fillerElementDimensions = fillerElement.getBoundingClientRect();
+      
+      // format an options object that holds the details of configuration for the info box
+      let options = {};
+      options.top = `${window.scrollY + fillerElementDimensions.y + infoBoxTopOffset}px`;
+      options.left = `${window.scrollX + fillerElementDimensions.x + fillerElementDimensions.width - infoBoxLeftOffset}px`;
+      options.text = skillPercent + "%";
+      
+      // highlight the skill element under touch 
+      highlightElement(skillElement);
+      // set the position and data of the box
+      configurerInfoBox(options);
+    }
+  }, longPressThreshold);
 }
 
 function cancelPressTimer(e) {
+  
   // check if there is a timer set
   if (pressTimer) {
     clearTimeout(pressTimer);
     pressTimer = null;
+    
+    let skillElement = lastSkillElement //e.target.findClosestParent(".skill");
+    
+    clearHighlightTimer = setTimeout(() => {
+      hideInfoBox();
+     if (skillElement) removeElementHighlight(skillElement);
+    }, 1000);
   }
 }
 
@@ -289,12 +366,13 @@ HTMLElement.prototype.findClosestParent =
     
     // if the element or one of its parents matches the selector
     if (this.closest(selector)) {
-      // find if there is a match for the element itself
+      // if the element matches the criteria itself
       if (this.matches(selector)) {
         return this;
       } else {
         let mainElement = this;
         let parentElement;
+        
         do {
           // find the element parent
           parentElement = mainElement.parentElement;
