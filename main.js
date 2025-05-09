@@ -24,39 +24,48 @@ function gererEntreeVide(e) {
   }
 }
 
-  // liens internes et target internes
-  const liensInternes = document.querySelectorAll('.internal-link,[href^="#"]:not([href$="#"])');
-  const documentSections = document.querySelectorAll(".internal-target");
+// liens internes et target internes
+const liensInternes = document.querySelectorAll('.internal-link,[href^="#"]:not([href$="#"])');
+const documentSections = document.querySelectorAll(".internal-target");
+
+
+// ajouter un listener pour les clicks sur les liens internes
+liensInternes.forEach(elementLien => {
+  elementLien.addEventListener("click", gererClickLienInterne);
+});
+
+// Sections 
+let tTimeout;
+let scrollDebounceDelaySeconds = .5;
+let hasScrolledDown = false;
+let isScrolling = false;
+let lastKnownYPosition = window.scrollY;
+
+document.addEventListener("scroll", (e) => {
+  // regarder s'il y a scroll vers le bas
+  hasScrolledDown = lastKnownYPosition < window.scrollY;
+  lastKnownYPosition = window.scrollY;
   
+  // si l'ecran est glisse vers le bas ou la valueur du glissement est plus petite que la hauteur de l'ecran
+  if (hasScrolledDown || window.scrollY < window.innerHeight) {
+    hideElement(goTopButtonElement)
+  } else {
+    showElement(goTopButtonElement);
+  }
+  // différer(debounce) l'action de fixation de l'élément actif
+  if (tTimeout) clearTimeout(tTimeout);
+  tTimeout = setTimeout(() => {
+    scrollDebounceActions();
+  }, scrollDebounceDelaySeconds * 1000);
   
-  // ajouter un listener pour les clicks sur les liens internes
-  liensInternes.forEach(elementLien => {
-    elementLien.addEventListener("click", gererClickLienInterne);
-  });
-  
-  // Sections 
-  let tTimeout;
-  let scrollDebounceDelaySeconds = .5;
-  let hasScrolledDown = false;
-  let lastKnownYPosition = window.scrollY;
-  
-  document.addEventListener("scroll", (e) => {
-    // regarder s'il y a scroll vers le bas
-    hasScrolledDown = lastKnownYPosition < window.scrollY;
-    lastKnownYPosition = window.scrollY;
-    
-    // si l'ecran est glisse vers le bas ou la valueur du glissement est plus petite que la hauteur de l'ecran
-    if (hasScrolledDown || window.scrollY < window.innerHeight) {
-      hideElement(goTopButtonElement)
-    } else {
-      showElement(goTopButtonElement);
-    }
-    // différer(debounce) l'action de fixation de l'élément actif
-    if (tTimeout) clearTimeout(tTimeout);
-    tTimeout = setTimeout(() => {
-      scrollDebounceActions();
-    }, scrollDebounceDelaySeconds * 1000);
-  });
+  //
+  isScrolling = true;
+});
+
+
+document.addEventListener("scrollend", () => {
+  isScrolling = false;
+});
 
 // gererClickLienInterne
 function gererClickLienInterne(e) {
@@ -73,6 +82,39 @@ function gererClickLienInterne(e) {
   // set active
   setActive(targetSelector.substring(1))
   
+}
+
+// Sélectionner les actions avec le class primary ou primary-outline 
+let primaryActions = document.querySelectorAll(".primary,.primary-outline");
+
+// ajouter un listener pour les clicks sur ces actions
+primaryActions.forEach(primaryAction => {
+  primaryAction.addEventListener("click", gereClickPrimaryAction);
+});
+
+
+// ajouter un listener pour un click en dehors d'un lien ou button initialement clické
+primaryActions.forEach(primaryAction => {
+  primaryAction.addEventListener("blur", gererBlurPrimaryAction);
+});
+
+
+function gereClickPrimaryAction(e) {
+  let primaryAction = e.target;
+  
+  if (primaryAction.classList.contains("primary") || primaryAction.classList.contains("primary-outline")) {
+    if (!primaryAction.classList.contains("clicked")) primaryAction.classList.add("clicked")
+  }
+}
+
+
+function gererBlurPrimaryAction(e) {
+  
+  let primaryAction = e.target;
+  
+  if (primaryAction.classList.contains("primary") || primaryAction.classList.contains("primary-outline")) {
+    if (primaryAction.classList.contains("clicked")) primaryAction.classList.remove("clicked")
+  }
 }
 
 function scrollDebounceActions() {
@@ -170,6 +212,7 @@ function getElementPositions(element) {
   return elementClientRects;
 }
 
+// show or hide the an element by toggling the class hidden based on display css property
 function showElement(element) {
   if (element.classList.contains("hidden")) element.classList.remove("hidden")
 }
@@ -178,9 +221,127 @@ function hideElement(element) {
   if (!element.classList.contains("hidden")) element.classList.add("hidden")
 }
 
+// Bar de compétences (selections)
+const barCompetences = document.querySelectorAll(".skill");
 
+const infoBox = document.querySelector("#info-box");
 
+function configurerInfoBox({ top, left, text }) {
+  // customize the info box position and details
+  infoBox.style.top = top;
+  infoBox.style.left = left;
+  infoBox.innerText = text;
+  
+  // show the info box
+  showInfoBox();
+}
 
+// show or hide the info box element by toggling the class visible based on opacity level
+function showInfoBox() {
+  if (!infoBox.classList.contains("visible")) infoBox.classList.add("visible")
+}
+
+function hideInfoBox() {
+  if (infoBox.classList.contains("visible")) infoBox.classList.remove("visible")
+}
+
+// add the class highlight to an element passed as argument
+function highlightElement(element) {
+  if (!element.classList.contains("highlight")) element.classList.add("highlight")
+}
+
+// remove the class highlight from an element passed as argument
+function removeElementHighlight(element) {
+  if (element.classList.contains("highlight")) element.classList.remove("highlight")
+}
+
+// Long press event configurations
+const longPressThreshold = 500; // milliseconds
+let pressTimer = null;
+let clearHighlightTimer = null;
+let infoBoxTopOffset = -70;
+let infoBoxLeftOffset = 10;
+
+let lastSkillElement;
+
+barCompetences.forEach(element => {
+  // Mouse events
+  element.addEventListener('mousedown', startPressTimer);
+  element.addEventListener('mouseup', cancelPressTimer);
+  element.addEventListener('mouseleave', cancelPressTimer);
+  
+  // Touch events
+  element.addEventListener('touchstart', startPressTimer);
+  element.addEventListener('touchend', cancelPressTimer);
+  element.addEventListener('touchcancel', cancelPressTimer);
+  
+});
+
+function startPressTimer(e) {
+  
+  // check if a previous skill element has highlight 
+  if (clearHighlightTimer && lastSkillElement) {
+    // clear the remove highlight timer;
+    clearTimeout(clearHighlightTimer);
+    clearHighlightTimer = null;
+    
+    // remove highlight immediately 
+    hideInfoBox();
+    removeElementHighlight(lastSkillElement);
+  }
+  // Long press detection using the duration of the touch and a timeout.
+  pressTimer = setTimeout(() => {
+    
+    // check if the document is not under scroll 
+    if (!isScrolling) {
+      
+      // find the skill element under pressure 
+      let skillElement = e.target.findClosestParent(".skill");
+      lastSkillElement = skillElement;
+      
+      let skillTextElement = skillElement.querySelector("p.nom");
+      
+      let leverElement = skillElement.querySelector(".leveler");
+      // the element that fills the skill bar according to is width
+      let fillerElement = skillElement.querySelector(".filler");
+      
+      // Evaluate the percentage of the skill filler element width 
+      let skillPercent = Math.round(100 * fillerElement.offsetWidth / leverElement.offsetWidth);
+      
+      // find the dimensions of the filler element
+      let fillerElementDimensions = fillerElement.getBoundingClientRect();
+      
+      // format an options object that holds the details of configuration for the info box
+      let options = {};
+      options.top = `${window.scrollY + fillerElementDimensions.y + infoBoxTopOffset}px`;
+      options.left = `${window.scrollX + fillerElementDimensions.x + fillerElementDimensions.width - infoBoxLeftOffset}px`;
+      options.text = skillPercent + "%";
+      
+      // highlight the skill element under touch 
+      highlightElement(skillElement);
+      // set the position and data of the box
+      configurerInfoBox(options);
+    }
+  }, longPressThreshold);
+}
+
+function cancelPressTimer(e) {
+  
+  // check if there is a timer set
+  if (pressTimer) {
+    clearTimeout(pressTimer);
+    pressTimer = null;
+    
+    let skillElement = lastSkillElement //e.target.findClosestParent(".skill");
+    
+    clearHighlightTimer = setTimeout(() => {
+      hideInfoBox();
+     if (skillElement) removeElementHighlight(skillElement);
+    }, 1000);
+  }
+}
+
+// To top button
 addGoTopButton();
 
 function addGoTopButton() {
@@ -192,6 +353,40 @@ function addGoTopButton() {
   //set the target element id
   goTopButton.setAttribute("href", "#" + targetElementId);
   goTopButton.onclick = gererClickLienInterne;
+  goTopButton.onblur = gererBlurPrimaryAction;
   goTopButtonElement = goTopButton;
   document.body.appendChild(goTopButton);
 }
+
+// define a method on HTMLElement class
+// it's intended to find the closest parent of an element that matches a specific selector given as an argument 
+// returns the element if it matches the selector, its closest parent that matches the selector or undefined if no match
+HTMLElement.prototype.findClosestParent =
+  function(selector) {
+    
+    // if the element or one of its parents matches the selector
+    if (this.closest(selector)) {
+      // if the element matches the criteria itself
+      if (this.matches(selector)) {
+        return this;
+      } else {
+        let mainElement = this;
+        let parentElement;
+        
+        do {
+          // find the element parent
+          parentElement = mainElement.parentElement;
+          
+          // check if the parent matches the selector 
+          if (parentElement.matches(selector)) {
+            return parentElement;
+          }
+          else {
+            // reassigning the parentElement as the next element to process (skip recursive statements)
+            mainElement = parentElement;
+          }
+        }
+        while (!parentElement.matches(selector))
+      }
+    }
+  }
