@@ -159,6 +159,9 @@ button,
 .navbar .internal-link.active {
   color: var(--primary-color, #9999E8);
   font-weight: bold;
+transition-property: color;
+transition-duration: 0.75s;
+transition-delay: 0.25s;
 }
 
 .nom-portfolio {
